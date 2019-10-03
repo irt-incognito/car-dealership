@@ -77,7 +77,13 @@ public class CarControllerTest {
         Car car3 = new CarBuilder().withColor(Color.White).withHasNavigation(false).build();
         List<Car> carList = Arrays.asList( car,car2,car3 );
 
-        given(mockCarRepository.findAll())
+        given(mockCarRepository.findAllByFilters(null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null))
                 .willReturn(carList);
 
         MockHttpServletResponse response = mockmvc.perform(
@@ -88,33 +94,6 @@ public class CarControllerTest {
         System.out.println("Message body: " + response.getContentAsString());
         assertThat(response.getStatus(), is(HttpStatus.OK.value()));
         assertThat(MAPPER.readValue(response.getContentAsString(), new TypeReference<List<Car>>() {}), containsInAnyOrder(car, car2, car3));
-    }
-
-
-//    Create Test below
-    @Test
-    public void createThrowsInternalServerError() throws Exception {
-        given(mockCarRepository.saveAll(any()))
-                .willThrow(new DataAccessException("I broke") {
-                });
-
-        Car car =  new CarBuilder()
-                .withMake("Chevy")
-                .withColor(Color.Black)
-                .withHasLowMiles(false)
-                .withHasNavigation(false)
-                .build();
-
-        List<Car> expectedCars = Arrays.asList(car);
-
-        MockHttpServletResponse response = mockmvc.perform(
-                post(URI.create("/car"))
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .content(MAPPER.writeValueAsString(expectedCars))
-        ).andReturn()
-                .getResponse();
-
-        assertThat(response.getStatus(), is(HttpStatus.INTERNAL_SERVER_ERROR.value()));
     }
 
     @Test
